@@ -1,14 +1,18 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File",
+            "name": "Python: Scrapy",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            "program": "poizon_scrapper/poizonscraper/poizonscraper/spiders/poizonspider.py",
+            "args": [
+                "scrapy",
+                "crawl",
+                "poizonspider",
+                "-O",
+                "poizondata.json"
+            ],
             "console": "integratedTerminal"
         }
     ]
