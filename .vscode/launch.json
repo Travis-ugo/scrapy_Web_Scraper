@@ -2,17 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Scrapy",
+            "name": "Debug Poizon",
             "type": "debugpy",
             "request": "launch",
-            "program": "poizon_scrapper/poizonscraper/poizonscraper/spiders/poizonspider.py",
+            "module": "scrapy.cmdline",
             "args": [
-                "scrapy",
                 "crawl",
                 "poizonspider",
-                "-O",
+                "-o",
                 "poizondata.json"
             ],
+            "cwd": "${workspaceFolder}/poizonscraper",
             "console": "integratedTerminal"
         }
     ]
