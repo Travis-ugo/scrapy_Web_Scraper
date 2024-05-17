@@ -10,8 +10,8 @@
 BOT_NAME = "poizonscraper"
 
 SPIDER_MODULES = ["poizonscraper.spiders"]
-NEWSPIDER_MODULE = "poizonscraper.spiders"
 
+NEWSPIDER_MODULE = "poizonscraper.spiders"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "poizonscraper (+http://www.yourdomain.com)"
@@ -26,22 +26,22 @@ SCRAPEOPS_NUM_RESULTS = 50
 
 SCRAPEOPS_PROXY_ENABLED = True
 
-
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 1
+CONCURRENT_REQUESTS = 28
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 1
+DOWNLOAD_DELAY = 2
 AUTOTHROTTLE_ENABLED = True
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 28
-CONCURRENT_REQUESTS_PER_IP = 28
+CONCURRENT_REQUESTS_PER_DOMAIN = 1
+CONCURRENT_REQUESTS_PER_IP = 1
 
+# DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
 
@@ -75,20 +75,27 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    "poizonscraper.pipelines.PoizonscraperPipeline": 300,
-#}
+ITEM_PIPELINES = {
+   "poizonscraper.pipelines.PoizonscraperPipeline": 300,
+   "poizonscraper.pipelines.MySQLPipeline": 400, 
+}
+
+MYSQL_HOST = 'localhost'
+MYSQL_DATABASE = 'products'
+MYSQL_USER = 'travis'
+MYSQL_PASSWORD = 'travis4422'
+MYSQL_PORT = 3306
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
-#AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-#AUTOTHROTTLE_START_DELAY = 5
+AUTOTHROTTLE_START_DELAY = 5
 # The maximum download delay to be set in case of high latencies
 #AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-#AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
+AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 # Enable showing throttling stats for every response received:
 #AUTOTHROTTLE_DEBUG = False
 

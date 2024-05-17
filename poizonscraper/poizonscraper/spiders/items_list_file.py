@@ -1,5 +1,5 @@
 
-list_of_items = ["https://www.poizon.com/search?keyword=FireMonkey","https://www.poizon.com/search?keyword=BLINDNOPLAN"] #,"https://www.poizon.com/search?keyword=RAF+SIMONS",]
+list_of_items = ["https://www.poizon.com/search?keyword=PASET",  "https://www.poizon.com/search?keyword=Revenge","https://www.poizon.com/search?keyword=JRs","https://www.poizon.com/search?keyword=Mizuno+coat"] #,"https://www.poizon.com/search?keyword=RAF+SIMONS",]
 
 list_of_items_parody = [
     "https://www.poizon.com/search?keyword=RAF+SIMONS",

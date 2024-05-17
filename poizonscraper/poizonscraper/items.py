@@ -14,13 +14,13 @@ class PoizonscraperItem(scrapy.Item):
 
 class ProductItems(scrapy.Item):
     Name = scrapy.Field()
-    Categories = scrapy.Field()
-    Color = scrapy.Field()
-    Images = scrapy.Field()
+    # Categories = scrapy.Field()
+    # Color = scrapy.Field()
+    # Images = scrapy.Field()
     Link = scrapy.Field()
-    SpuId = scrapy.Field()
-    CategoryId = scrapy.Field()
-    Brand = scrapy.Field()
-    Vendor = scrapy.Field()
+    # SpuId = scrapy.Field()
+    # CategoryId = scrapy.Field()
+    # Brand = scrapy.Field()
+    # Vendor = scrapy.Field()
 
 

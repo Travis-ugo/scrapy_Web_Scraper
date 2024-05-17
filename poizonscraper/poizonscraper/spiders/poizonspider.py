@@ -1,33 +1,52 @@
+
+
 import scrapy
 import json
 from poizonscraper.items import ProductItems
 from poizonscraper.spiders.items_list_file import list_of_items
-
 
 class PoizonspiderSpider(scrapy.Spider):
     name = "poizonspider"
     allowed_domains = ["poizon.com"]
     start_urls = ["https://poizon.com"]
     url_count = 1
+  
+    keyword_fetch_list = ["Revenge","JRs"]
+    keyword_list = ["Mizuno+coat"]
 
+    def start_requests(self): 
+        for keyword in self.keyword_list:
+            poizon_search_url = f"https://www.poizon.com/search?keyword={keyword}"
+            print(f"Start URL =================================")
+
+            yield scrapy.Request(url=poizon_search_url, callback=self.parse, meta={ 'keyword': keyword })
+          
     def parse(self, response):
-        for link in list_of_items:
-            print("Start URL =================================")
-            yield scrapy.Request(url=link, callback=self.parse_product_items)
+        print(f"URL: {response.url}")
 
-    def parse_product_items(self, response):
         script_text = response.css("script#__NEXT_DATA__::text").get()
         script_data = json.loads(script_text)
         spu_list = script_data.get("props", {}).get("pageProps", {}).get("spuList", [])
 
-        for spu_link in spu_list:
-            spu_id = spu_link.get("spuId")
-            if spu_id:
-                product_item_details_url = f"https://www.poizon.com/product/{spu_id}"
-                yield scrapy.Request(
+        items = response.css('.GoodsList_goodsList__hPoCW .GoodsItem_goodsItem__pfNZb')
+
+        for item in items:
+            title = item.css('.GoodsItem_spuTitle__ED79N::text').get()
+            link = item.css('::attr(href)').get()
+            product_item_details_url = f"https://www.poizon.com{link}"
+            yield scrapy.Request(
                     url=product_item_details_url,
                     callback=self.parse_product_item_details,
                 )
+
+        # for spu_link in spu_list:
+        #     spu_id = spu_link.get("spuId")
+        #     if spu_id:
+        #         product_item_details_url = f"https://www.poizon.com/product/{spu_id}"
+        #         yield scrapy.Request(
+        #             url=product_item_details_url,
+        #             callback=self.parse_product_item_details,
+        #         )
 
         page_items = response.css("li.ant-pagination-item")
 
@@ -55,11 +74,21 @@ class PoizonspiderSpider(scrapy.Spider):
                     next_page_url = f"{response.url}&page={self.url_count}"
 
                 yield scrapy.Request(
-                    url=next_page_url, callback=self.parse_product_items
+                    url=next_page_url, callback=self.parse
                 )
         else:
             pass
             # self.logger.info("No pagination items found. Ending parsing.")
+
+        if self.keyword_fetch_list:
+            self.keyword_list.pop(0)
+            if not self.keyword_list:
+                if self.keyword_fetch_list:
+                    self.keyword_list.append(self.keyword_fetch_list.pop(0))
+                    print(f"Keyword fetch: {self.keyword_fetch_list}")
+                    print(f"Keyword: {self.keyword_list}")
+                    yield from self.start_requests()
+
 
     def parse_product_item_details(self, response):
         script_text = response.css("script#__NEXT_DATA__::text").get()
@@ -68,8 +97,19 @@ class PoizonspiderSpider(scrapy.Spider):
             script_data.get("props", {}).get("pageProps", {}).get("goodsDetail", {})
         )
 
+        title = response.css('.MainInfo_title__YSsXk::text').get()
+
+        # Using CSS selector to select the price
+        price = response.css('.MainInfo_priceBar__tcUgc div::text').get()
+
+        img_elements = response.css('.ImageSkeleton_skeleton__yq_Y9 img')
+
+        # Printing the title and price
+        # print("Title:", title.strip())  # Use strip() to remove leading and trailing whitespaces if needed
+        # print("Price:", price.strip())  
+
         item = ProductItems()
-        item["Name"] = spu_item_details.get("detail", {}).get("title")
+        item["Name"] = title.strip()#spu_item_details.get("detail", {}).get("title")
         item["Categories"] = spu_item_details.get("detail", {}).get("frontCategoryName")
         item["Color"] = {"Black": {"Sizes": {}}}
         item["Images"] = [
@@ -81,125 +121,3 @@ class PoizonspiderSpider(scrapy.Spider):
         item["Brand"] = spu_item_details.get("detail", {}).get("brandName")
         item["Vendor"] = "HS9528"
         yield item
-
-
-# import scrapy
-# import json
-# from poizonscraper.items import ProductItems
-# from poizonscraper.spiders.items_list_file import list_of_items
-
-
-# class PoizonspiderSpider(scrapy.Spider):
-#     name = "poizonspider"
-#     allowed_domains = ["poizon.com"]
-#     start_urls = ["https://poizon.com"]
-#     url_count = 1
-
-#     # def parse(self, response):
-#     #     for index, link in enumerate(list_of_items):
-#     #         yield scrapy.Request(url=link, callback=self.parse_product_items)
-#     #         print(f"Processing URL {index+1}: {link}")  # Print for reference
-#             # self.parse_product_items(response=response, url=link)
-
-
-#     def parse(self, response):
-#     # Recursively iterate through the list_of_items
-#         for index, link in enumerate(list_of_items):
-#             yield scrapy.Request(url=link, callback=self.parse_link)
-
-#     def parse_link(self, response):
-#         for index, link in enumerate(response.meta.get('list_of_items', list_of_items)):
-#             print(f"Processing URL {index+1}: {link}")  # Print for reference
-#             yield scrapy.Request(url=link, callback=self.parse_product_items)
-
-#         # Call parse function again for next link in the list (if any)
-#         next_link_index = response.meta.get('list_of_items_index', 0) + 1
-#         if next_link_index < len(list_of_items):
-#             yield scrapy.Request(
-#                 url=self.start_urls[0],  # Use the first url to trigger parse again
-#                 callback=self.parse,
-#                 meta={'list_of_items': list_of_items[next_link_index:], 'list_of_items_index': next_link_index}
-#             )
-
-
-#     def parse_product_items(self, response):
-#         script_text = response.css("script#__NEXT_DATA__::text").get()
-#         if not script_text:
-#             self.logger.warning(f"No script data found for URL: {response.url}")
-#             return
-
-#         try:
-#             script_data = json.loads(script_text)
-#             spu_list = (
-#                 script_data.get("props", {}).get("pageProps", {}).get("spuList", [])
-#             )
-#         except json.JSONDecodeError:
-#             self.logger.error(f"Failed to parse JSON data for URL: {response.url}")
-#             return
-
-#         for spu_link in spu_list:
-#             spu_id = spu_link.get("spuId")
-#             if spu_id:
-#                 product_item_details_url = f"https://www.poizon.com/product/{spu_id}"
-#                 yield scrapy.Request(
-#                     url=product_item_details_url,
-#                     callback=self.parse_product_item_details,
-#                 )
-
-#         page_items = response.css("li.ant-pagination-item")
-
-#         # Check if page_items is available
-#         if page_items:
-#             # Extract the titles of these list items
-#             titles = page_items.css("::attr(title)").getall()
-
-#             # Filter out non-numeric titles and convert them to integers
-#             page_numbers = [int(title) for title in titles if title.isdigit()]
-
-#             # Find the maximum page number
-#             max_page_number = max(page_numbers)
-
-#             if self.url_count <= max_page_number:
-#                 # Increment the page count
-#                 self.url_count += 1
-
-#                 # Modify the URL to go to the next page
-#                 if "page" in response.url:
-#                     next_page_url = response.url.replace(
-#                         f"page={self.url_count - 1}", f"page={self.url_count}"
-#                     )
-#                 else:
-#                     next_page_url = f"{response.url}&page={self.url_count}"
-
-#                 yield scrapy.Request(
-#                     url=next_page_url, callback=self.parse_product_items
-#                 )
-
-#     def parse_product_item_details(self, response):
-#         script_text = response.css("script#__NEXT_DATA__::text").get()
-#         if not script_text:
-#             self.logger.warning(f"No script data found for URL: {response.url}")
-#             return
-
-#         try:
-#             script_data = json.loads(script_text)
-#             spu_item_details = (
-#                 script_data.get("props", {}).get("pageProps", {}).get("goodsDetail", {})
-#             )
-#         except json.JSONDecodeError:
-#             self.logger.error(f"Failed to parse JSON data for URL: {response.url}")
-#             return
-
-#         item = ProductItems()
-#         item["Name"] = spu_item_details.get("detail", {}).get("title")
-#         item["Categories"] = spu_item_details.get("detail", {}).get("frontCategoryName")
-#         item["Color"] = {"Black": {"Sizes": {}}}
-#         item["Images"] = [
-#             image.get("url") for image in spu_item_details.get("imageModels", [])
-#         ]
-#         item["Link"] = response.url
-#         item["SpuId"] = spu_item_details.get("detail", {}).get("spuId")
-#         item["CategoryId"] = spu_item_details.get("detail", {}).get("categoryId")
-#         item["Brand"] = spu_item_details.get("detail", {}).get("brandName")
-#         item["Vendor"] = "HS9528"
-#         yield item
