@@ -1,7 +1,19 @@
+# import redis
+# from redis import from_url
 
-list_of_items = ["https://www.poizon.com/search?keyword=PASET",  "https://www.poizon.com/search?keyword=Revenge","https://www.poizon.com/search?keyword=JRs","https://www.poizon.com/search?keyword=Mizuno+coat"] #,"https://www.poizon.com/search?keyword=RAF+SIMONS",]
 
-list_of_items_parody = [
+# Create a redis client
+# redisClient = redis.from_url('redis:/default:KWrbprr2MFTUZRrx9DRVcRYgkTZODzFb@redis-16078.c84.us-east-1-2.ec2.redns.redis-cloud.com:16078')
+
+# # Push URLs to Redis Queue
+# redisClient.lpush('products_queue:start_urls', "https://www.poizon.com/search?keyword=PASET")
+# redisClient.lpush('products_queue:start_urls', "https://www.poizon.com/search?keyword=Revenge")
+# redisClient.lpush('products_queue:start_urls', "https://www.poizon.com/search?keyword=JRs")
+# redisClient.lpush('products_queue:start_urls', "https://www.poizon.com/search?keyword=Mizuno+coat")
+
+poizon_urls = ["https://www.poizon.com/search?keyword=PASET",  "https://www.poizon.com/search?keyword=Revenge","https://www.poizon.com/search?keyword=JRs","https://www.poizon.com/search?keyword=Mizuno+coat"] #,"https://www.poizon.com/search?keyword=RAF+SIMONS",]
+
+poizon_urls_long = [
     "https://www.poizon.com/search?keyword=RAF+SIMONS",
     "https://www.poizon.com/search?keyword=ROARINGWILD",
     "https://www.poizon.com/search?keyword=Chloe",

@@ -30,7 +30,7 @@ SCRAPEOPS_PROXY_ENABLED = True
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 28
+CONCURRENT_REQUESTS = 16
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -38,10 +38,10 @@ CONCURRENT_REQUESTS = 28
 DOWNLOAD_DELAY = 2
 AUTOTHROTTLE_ENABLED = True
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 1
-CONCURRENT_REQUESTS_PER_IP = 1
+CONCURRENT_REQUESTS_PER_DOMAIN = 16
+CONCURRENT_REQUESTS_PER_IP = 16
 
-# DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
 
@@ -77,7 +77,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    "poizonscraper.pipelines.PoizonscraperPipeline": 300,
-   "poizonscraper.pipelines.MySQLPipeline": 400, 
+   # "poizonscraper.pipelines.MySQLPipeline": 400, 
 }
 
 MYSQL_HOST = 'localhost'
@@ -111,3 +111,6 @@ HTTPCACHE_ENABLED = False
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+# Redis Connection URL
+REDIS_URL = 'redis:/default:KWrbprr2MFTUZRrx9DRVcRYgkTZODzFb@redis-16078.c84.us-east-1-2.ec2.redns.redis-cloud.com:16078'

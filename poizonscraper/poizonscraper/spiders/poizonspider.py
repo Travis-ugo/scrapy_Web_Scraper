@@ -1,26 +1,32 @@
-
-
 import scrapy
 import json
 from poizonscraper.items import ProductItems
-from poizonscraper.spiders.items_list_file import list_of_items
+from poizonscraper.poizonscraper.spiders.poizon_urls import poizon_urls
+
 
 class PoizonspiderSpider(scrapy.Spider):
     name = "poizonspider"
     allowed_domains = ["poizon.com"]
     start_urls = ["https://poizon.com"]
     url_count = 1
-  
-    keyword_fetch_list = ["Revenge","JRs"]
+
+    redis_key = "products_queue:start_urls"
+    # Number of url to fetch from redis on each attempt
+    redis_batch_size = 1
+    # Max idle time(in seconds) before the spider stops checking redis and shuts down
+    max_idle_time = 7
+
+    keyword_fetch_list = ["Revenge", "JRs"]
     keyword_list = ["Mizuno+coat"]
 
-    def start_requests(self): 
+    def start_requests(self):
         for keyword in self.keyword_list:
             poizon_search_url = f"https://www.poizon.com/search?keyword={keyword}"
-            print(f"Start URL =================================")
 
-            yield scrapy.Request(url=poizon_search_url, callback=self.parse, meta={ 'keyword': keyword })
-          
+            yield scrapy.Request(
+                url=poizon_search_url, callback=self.parse, meta={"keyword": keyword}
+            )
+
     def parse(self, response):
         print(f"URL: {response.url}")
 
@@ -28,16 +34,16 @@ class PoizonspiderSpider(scrapy.Spider):
         script_data = json.loads(script_text)
         spu_list = script_data.get("props", {}).get("pageProps", {}).get("spuList", [])
 
-        items = response.css('.GoodsList_goodsList__hPoCW .GoodsItem_goodsItem__pfNZb')
+        items = response.css(".GoodsList_goodsList__hPoCW .GoodsItem_goodsItem__pfNZb")
 
         for item in items:
-            title = item.css('.GoodsItem_spuTitle__ED79N::text').get()
-            link = item.css('::attr(href)').get()
+            title = item.css(".GoodsItem_spuTitle__ED79N::text").get()
+            link = item.css("::attr(href)").get()
             product_item_details_url = f"https://www.poizon.com{link}"
             yield scrapy.Request(
-                    url=product_item_details_url,
-                    callback=self.parse_product_item_details,
-                )
+                url=product_item_details_url,
+                callback=self.parse_product_item_details,
+            )
 
         # for spu_link in spu_list:
         #     spu_id = spu_link.get("spuId")
@@ -73,9 +79,7 @@ class PoizonspiderSpider(scrapy.Spider):
                 else:
                     next_page_url = f"{response.url}&page={self.url_count}"
 
-                yield scrapy.Request(
-                    url=next_page_url, callback=self.parse
-                )
+                yield scrapy.Request(url=next_page_url, callback=self.parse)
         else:
             pass
             # self.logger.info("No pagination items found. Ending parsing.")
@@ -89,7 +93,6 @@ class PoizonspiderSpider(scrapy.Spider):
                     print(f"Keyword: {self.keyword_list}")
                     yield from self.start_requests()
 
-
     def parse_product_item_details(self, response):
         script_text = response.css("script#__NEXT_DATA__::text").get()
         script_data = json.loads(script_text)
@@ -97,19 +100,19 @@ class PoizonspiderSpider(scrapy.Spider):
             script_data.get("props", {}).get("pageProps", {}).get("goodsDetail", {})
         )
 
-        title = response.css('.MainInfo_title__YSsXk::text').get()
+        title = response.css(".MainInfo_title__YSsXk::text").get()
 
         # Using CSS selector to select the price
-        price = response.css('.MainInfo_priceBar__tcUgc div::text').get()
+        price = response.css(".MainInfo_priceBar__tcUgc div::text").get()
 
-        img_elements = response.css('.ImageSkeleton_skeleton__yq_Y9 img')
+        img_elements = response.css(".ImageSkeleton_skeleton__yq_Y9 img")
 
         # Printing the title and price
         # print("Title:", title.strip())  # Use strip() to remove leading and trailing whitespaces if needed
-        # print("Price:", price.strip())  
+        # print("Price:", price.strip())
 
         item = ProductItems()
-        item["Name"] = title.strip()#spu_item_details.get("detail", {}).get("title")
+        item["Name"] = title.strip()  # spu_item_details.get("detail", {}).get("title")
         item["Categories"] = spu_item_details.get("detail", {}).get("frontCategoryName")
         item["Color"] = {"Black": {"Sizes": {}}}
         item["Images"] = [
